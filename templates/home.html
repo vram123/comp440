@@ -1,0 +1,10 @@
+
+{% extends "base.html" %}
+{% block content %}
+  {% if user %}
+    <p>Welcome, <strong>{{ user.firstName }} {{ user.lastName }}</strong> ({{ user.username }})!</p>
+    <p>You are logged in.</p>
+  {% else %}
+    <p>Please sign up or log in to continue.</p>
+  {% endif %}
+{% endblock %}

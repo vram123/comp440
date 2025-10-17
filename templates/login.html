@@ -1,0 +1,10 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h2>Login</h2>
+  <form method="post" autocomplete="off">
+    <label>Username<input name="username" value="{{ (form.username if form) or '' }}" required></label>
+    <label>Password<input type="password" name="password" required></label>
+    <button type="submit">Login</button>
+  </form>
+{% endblock %}
