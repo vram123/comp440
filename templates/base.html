@@ -1,39 +1,50 @@
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>COMP 440 Phase 1</title>
+    <title>{% block title %}COMP 440 Phase 1{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
-    <header>
-      <h1>COMP 440 — Phase 1 Demo</h1>
-      <nav>
-        <a href="{{ url_for('index') }}">Home</a>
-        {% if session.get('user') %}
-          <a href="{{ url_for('logout') }}">Logout</a>
-        {% else %}
-          <a href="{{ url_for('signup') }}">Sign Up</a>
-          <a href="{{ url_for('login') }}">Login</a>
-        {% endif %}
-      </nav>
+    <header class="site-header">
+      <div class="shell">
+        <h1 class="brand"><a href="{{ url_for('index') }}">COMP 440 — Phase 1 Demo</a></h1>
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+          {% if session.get('user') %}
+            <span class="nav-text">Hi, {{ session.user.firstName }}</span>
+            <a class="btn btn-ghost" href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+            <a class="btn btn-ghost" href="{{ url_for('signup') }}">Sign Up</a>
+            <a class="btn btn-primary" href="{{ url_for('login') }}">Login</a>
+          {% endif %}
+        </nav>
+      </div>
     </header>
-    <main>
+
+    <main class="shell">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          <ul class="flashes">
+          <ul class="flashes" role="status" aria-live="polite">
             {% for category, message in messages %}
-              <li class="{{ category }}">{{ message }}</li>
+              <li class="flash {{ category }}">{{ message }}</li>
             {% endfor %}
           </ul>
         {% endif %}
       {% endwith %}
-      {% block content %}{% endblock %}
+
+      <section class="card">
+        {% block content %}{% endblock %}
+      </section>
     </main>
-    <footer>
-      <small>Uses parameterized SQL & hashed passwords (werkzeug.security).</small>
+
+    <footer class="site-footer">
+      <div class="shell">
+        <small class="muted">
+          Uses parameterized SQL &amp; hashed passwords (werkzeug.security).
+        </small>
+      </div>
     </footer>
   </body>
 </html>

@@ -1,10 +1,18 @@
-
 {% extends "base.html" %}
+{% block title %}Home · COMP 440{% endblock %}
 {% block content %}
-  {% if user %}
-    <p>Welcome, <strong>{{ user.firstName }} {{ user.lastName }}</strong> ({{ user.username }})!</p>
-    <p>You are logged in.</p>
+  {% if session.get('user') %}
+    <h1 class="h1">Welcome back, {{ session.user.firstName }} {{ session.user.lastName }}</h1>
+    <p class="muted">Signed in as <strong>{{ session.user.username }}</strong>.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="{{ url_for('logout') }}">Logout</a>
+    </div>
   {% else %}
-    <p>Please sign up or log in to continue.</p>
+    <h1 class="h1">Welcome to the User Portal</h1>
+    <p class="muted">Create an account or sign in to continue.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="{{ url_for('signup') }}">Create account</a>
+      <a class="btn btn-ghost" href="{{ url_for('login') }}">I already have an account</a>
+    </div>
   {% endif %}
 {% endblock %}

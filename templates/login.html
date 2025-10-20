@@ -1,10 +1,31 @@
-
 {% extends "base.html" %}
+{% block title %}Login · COMP 440{% endblock %}
 {% block content %}
-  <h2>Login</h2>
-  <form method="post" autocomplete="off">
-    <label>Username<input name="username" value="{{ (form.username if form) or '' }}" required></label>
-    <label>Password<input type="password" name="password" required></label>
-    <button type="submit">Login</button>
+  <h1 class="h1">Login</h1>
+  <form class="form" method="post" novalidate autocomplete="off">
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username"
+             name="username"
+             value="{{ (form.username if form) or '' }}"
+             required
+             autocomplete="username"
+             autofocus>
+      <small class="hint">Use the username you registered with.</small>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password"
+             type="password"
+             name="password"
+             required
+             autocomplete="current-password">
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" type="submit">Login</button>
+      <a class="btn btn-ghost" href="{{ url_for('signup') }}">Create an account</a>
+    </div>
   </form>
 {% endblock %}

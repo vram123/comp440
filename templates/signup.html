@@ -1,15 +1,80 @@
-
 {% extends "base.html" %}
+{% block title %}Sign Up · COMP 440{% endblock %}
 {% block content %}
-  <h2>Create Account</h2>
-  <form method="post" autocomplete="off">
-    <label>Username<input name="username" value="{{ (form.username if form) or '' }}" required></label>
-    <label>Password<input type="password" name="password" required></label>
-    <label>Confirm Password<input type="password" name="password_confirm" required></label>
-    <label>First Name<input name="firstName" value="{{ (form.firstName if form) or '' }}" required></label>
-    <label>Last Name<input name="lastName" value="{{ (form.lastName if form) or '' }}" required></label>
-    <label>Email<input type="email" name="email" value="{{ (form.email if form) or '' }}" required></label>
-    <label>Phone<input name="phone" value="{{ (form.phone if form) or '' }}" required></label>
-    <button type="submit">Sign Up</button>
+  <h1 class="h1">Create your account</h1>
+  <form class="form" method="post" novalidate autocomplete="off">
+    <div class="grid">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username"
+               name="username"
+               value="{{ (form.username if form) or '' }}"
+               required
+               autocomplete="username"
+               autofocus>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email"
+               type="email"
+               name="email"
+               value="{{ (form.email if form) or '' }}"
+               required
+               autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone</label>
+        <input id="phone"
+               name="phone"
+               value="{{ (form.phone if form) or '' }}"
+               required
+               inputmode="tel"
+               autocomplete="tel">
+      </div>
+
+      <div class="field">
+        <label for="firstName">First name</label>
+        <input id="firstName"
+               name="firstName"
+               value="{{ (form.firstName if form) or '' }}"
+               required
+               autocomplete="given-name">
+      </div>
+
+      <div class="field">
+        <label for="lastName">Last name</label>
+        <input id="lastName"
+               name="lastName"
+               value="{{ (form.lastName if form) or '' }}"
+               required
+               autocomplete="family-name">
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password"
+               type="password"
+               name="password"
+               required
+               autocomplete="new-password">
+      </div>
+
+      <div class="field">
+        <label for="password_confirm">Confirm password</label>
+        <input id="password_confirm"
+               type="password"
+               name="password_confirm"
+               required
+               autocomplete="new-password">
+        <small class="hint">Passwords must match.</small>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" type="submit">Create account</button>
+      <a class="btn btn-ghost" href="{{ url_for('login') }}">I already have an account</a>
+    </div>
   </form>
 {% endblock %}
