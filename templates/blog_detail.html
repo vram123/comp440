@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Blog · COMP 440{% endblock %}
+{% block content %}
+  <h2>{{ blog.subject }}</h2>
+  <p class="muted">by <strong>{{ blog.owner }}</strong> on {{ blog.created_at }}</p>
+  <p>{{ blog.description }}</p>
+
+  <hr>
+
+  <h3>Leave a comment</h3>
+  <form method="post" class="form">
+    <label>Sentiment
+      <select name="sentiment" required>
+        <option value="">— choose —</option>
+        <option value="positive">Positive</option>
+        <option value="negative">Negative</option>
+      </select>
+    </label>
+    <label>Comment
+      <input name="description" required placeholder="This is a nice blog…">
+    </label>
+    <button class="btn btn-primary" type="submit">Add comment</button>
+  </form>
+
+  <h3>Comments</h3>
+  {% if comments %}
+    <ul>
+      {% for c in comments %}
+        <li>
+          <strong>{{ c.reviewer_name }}</strong> ({{ c.reviewer }}) • {{ c.sentiment }} — {{ c.description }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No comments yet.</p>
+  {% endif %}
+{% endblock %}

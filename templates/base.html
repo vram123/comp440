@@ -13,7 +13,8 @@
         <nav class="nav" aria-label="Primary">
           <a class="nav-link" href="{{ url_for('index') }}">Home</a>
           {% if session.get('user') %}
-            <span class="nav-text">Hi, {{ session.user.firstName }}</span>
+            <a class="nav-link" href="{{ url_for('blogs_new') }}">New Blog</a>
+            <a class="nav-link" href="{{ url_for('blogs_search') }}">Search</a>
             <a class="btn btn-ghost" href="{{ url_for('logout') }}">Logout</a>
           {% else %}
             <a class="btn btn-ghost" href="{{ url_for('signup') }}">Sign Up</a>

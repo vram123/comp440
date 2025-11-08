@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}New Blog · COMP 440{% endblock %}
+{% block content %}
+  <h2>Create a blog</h2>
+  <form method="post" class="form" autocomplete="off">
+    <label>Subject
+      <input name="subject" value="{{ (form.subject if form) or '' }}" required>
+    </label>
+    <label>Description
+      <input name="description" value="{{ (form.description if form) or '' }}" required>
+    </label>
+    <label>Tags (comma-separated)
+      <input name="tags" value="{{ (form.tags if form) or '' }}" placeholder="blockchain, bitcoin, decentralized">
+    </label>
+    <div class="actions">
+      <button class="btn btn-primary" type="submit">Post blog</button>
+      <a class="btn btn-ghost" href="{{ url_for('blogs_search') }}">Search by tag</a>
+    </div>
+  </form>
+{% endblock %}

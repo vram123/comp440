@@ -1,11 +1,22 @@
-
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 from db import get_db
 
 app = Flask(__name__)
 app.secret_key = "change-me-in-production"  # For sessions & flash
 
+# ---------- helpers ----------
+def login_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            flash("Please log in first.", "error")
+            return redirect(url_for("login"))
+        return fn(*args, **kwargs)
+    return wrapper
+
+# ---------- phase 1 ----------
 @app.route("/")
 def index():
     user = session.get("user")
@@ -49,7 +60,6 @@ def signup():
             # Duplicate detection for username/email/phone via UNIQUE constraints
             msg = str(e).lower()
             if "unique constraint" in msg or "unique failed" in msg or "constraint failed" in msg:
-                # determine which field likely failed
                 failed_field = "username/email/phone"
                 if "user.username" in msg:
                     failed_field = "username"
@@ -85,11 +95,141 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("index"))
 
+# ---------- phase 2 ----------
+# Create blog (limit: <= 2 blogs/day per user)
+@app.route("/blogs/new", methods=["GET", "POST"])
+@login_required
+def blogs_new():
+    if request.method == "POST":
+        owner = session["user"]["username"]
+        subject = (request.form.get("subject") or "").strip()
+        description = (request.form.get("description") or "").strip()
+        tags_csv = (request.form.get("tags") or "").strip()
+
+        if not subject or not description:
+            flash("Subject and description are required.", "error")
+            return render_template("blogs_new.html", form=request.form)
+
+        with get_db() as conn:
+            # Count today's blogs by this user
+            c = conn.execute(
+                "SELECT COUNT(*) AS c FROM blog WHERE owner=? AND date(created_at)=date('now','localtime')",
+                (owner,)
+            ).fetchone()["c"]
+            if c >= 2:
+                flash("Daily blog limit reached (2/day).", "error")
+                return render_template("blogs_new.html", form=request.form)
+
+            cur = conn.execute(
+                "INSERT INTO blog (owner, subject, description) VALUES (?, ?, ?)",
+                (owner, subject, description)
+            )
+            blog_id = cur.lastrowid
+
+            # Insert tags (comma-separated)
+            tags = [t.strip().lower() for t in tags_csv.split(",") if t.strip()]
+            for t in tags:
+                conn.execute("INSERT OR IGNORE INTO blog_tag (blog_id, tag) VALUES (?, ?)", (blog_id, t))
+            conn.commit()
+
+        flash("Blog posted.", "success")
+        return redirect(url_for("blog_detail", blog_id=blog_id))
+
+    return render_template("blogs_new.html")
+
+# Search blogs by tag
+@app.route("/blogs/search", methods=["GET", "POST"])
+def blogs_search():
+    results = []
+    q = ""
+    if request.method == "POST":
+        q = (request.form.get("tag") or "").strip().lower()
+        if q:
+            with get_db() as conn:
+                results = conn.execute("""
+                    SELECT b.id, b.subject, b.owner, date(b.created_at) AS d
+                    FROM blog b
+                    JOIN blog_tag t ON t.blog_id = b.id
+                    WHERE t.tag = ?
+                    ORDER BY b.created_at DESC
+                """, (q,)).fetchall()
+        else:
+            flash("Enter a tag to search.", "error")
+    return render_template("blogs_search.html", tag=q, results=results)
+
+# Blog detail + comments (rules: <=3/day, <=1 per blog/user, no self-comment)
+@app.route("/blogs/<int:blog_id>", methods=["GET", "POST"])
+@login_required
+def blog_detail(blog_id):
+    user = session["user"]
+    with get_db() as conn:
+        blog = conn.execute("SELECT * FROM blog WHERE id=?", (blog_id,)).fetchone()
+        if not blog:
+            flash("Blog not found.", "error")
+            return redirect(url_for("blogs_search"))
+        comments = conn.execute("""
+            SELECT c.*, u.firstName || ' ' || u.lastName AS reviewer_name
+            FROM comment c
+            JOIN user u ON u.username = c.reviewer
+            WHERE c.blog_id = ?
+            ORDER BY c.created_at DESC
+        """, (blog_id,)).fetchall()
+
+    if request.method == "POST":
+        reviewer = user["username"]
+        sentiment = (request.form.get("sentiment") or "").lower()
+        text = (request.form.get("description") or "").strip()
+
+        if sentiment not in ("positive", "negative"):
+            flash("Choose a sentiment.", "error")
+            return render_template("blog_detail.html", blog=blog, comments=comments)
+        if not text:
+            flash("Comment text is required.", "error")
+            return render_template("blog_detail.html", blog=blog, comments=comments)
+
+        with get_db() as conn:
+            # No self-comment
+            owner = conn.execute("SELECT owner FROM blog WHERE id=?", (blog_id,)).fetchone()["owner"]
+            if owner == reviewer:
+                flash("You cannot comment on your own blog.", "error")
+                return render_template("blog_detail.html", blog=blog, comments=comments)
+
+            # <= 3 comments today by this user
+            daily = conn.execute("""
+                SELECT COUNT(*) AS c
+                FROM comment
+                WHERE reviewer=? AND date(created_at)=date('now','localtime')
+            """, (reviewer,)).fetchone()["c"]
+            if daily >= 3:
+                flash("Daily comment limit reached (3/day).", "error")
+                return render_template("blog_detail.html", blog=blog, comments=comments)
+
+            # <= 1 comment on this blog by this user
+            exists = conn.execute(
+                "SELECT 1 FROM comment WHERE blog_id=? AND reviewer=?",
+                (blog_id, reviewer)
+            ).fetchone()
+            if exists:
+                flash("You already commented on this blog.", "error")
+                return render_template("blog_detail.html", blog=blog, comments=comments)
+
+            conn.execute("""
+                INSERT INTO comment (blog_id, reviewer, sentiment, description)
+                VALUES (?, ?, ?, ?)
+            """, (blog_id, reviewer, sentiment, text))
+            conn.commit()
+
+        flash("Comment added.", "success")
+        return redirect(url_for("blog_detail", blog_id=blog_id))
+
+    return render_template("blog_detail.html", blog=blog, comments=comments)
+
+# ---------- main ----------
 if __name__ == "__main__":
+    # Bind to 0.0.0.0 so it works in Docker too
     import os
     app.run(
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", "5000")),
         debug=os.getenv("FLASK_DEBUG", "1") == "1",
     )
-

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Search Blogs · COMP 440{% endblock %}
+{% block content %}
+  <h2>Search by tag</h2>
+  <form method="post" class="form">
+    <label>Tag
+      <input name="tag" value="{{ tag or '' }}" placeholder="e.g. blockchain" required>
+    </label>
+    <button class="btn btn-primary" type="submit">Search</button>
+  </form>
+
+  {% if results %}
+    <h3>Results for “{{ tag }}”</h3>
+    <ul>
+      {% for r in results %}
+        <li>
+          <a href="{{ url_for('blog_detail', blog_id=r.id) }}">{{ r.subject }}</a>
+          &nbsp;•&nbsp; by <strong>{{ r.owner }}</strong> on {{ r.d }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% elif tag %}
+    <p class="muted">No blogs found for that tag.</p>
+  {% endif %}
+{% endblock %}
