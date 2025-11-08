@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    container_name: comp440_web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_DEBUG=1
+      - DATABASE_PATH=/data/app.db
+    volumes:
+      - ./data:/data        # DB persists at ./data/app.db on your machine
+    restart: unless-stopped
