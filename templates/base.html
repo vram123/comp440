@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}COMP 440 Phase 1{% endblock %}</title>
+    <title>{% block title %}COMP 440 Phase 1 + 2{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
     <header class="site-header">
       <div class="shell">
-        <h1 class="brand"><a href="{{ url_for('index') }}">COMP 440 — Phase 1 Demo</a></h1>
+        <h1 class="brand"><a href="{{ url_for('index') }}">COMP 440 — Phase 1 + 2 Demo</a></h1>
         <nav class="nav" aria-label="Primary">
           <a class="nav-link" href="{{ url_for('index') }}">Home</a>
           {% if session.get('user') %}
