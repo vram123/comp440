@@ -1,14 +1,18 @@
 {% extends "base.html" %}
+{% block title %}Q3 · Followed by X & Y{% endblock %}
 {% block content %}
-  <h2>Q3: Users followed by both X and Y</h2>
-  <form method="post">
-    <label>Follower X
-      <input name="f1" value="{{ f1 or '' }}" required>
-    </label>
-    <label>Follower Y
-      <input name="f2" value="{{ f2 or '' }}" required>
-    </label>
-    <button type="submit">Search</button>
+  <h2 class="h1">Q3: Users followed by both X and Y</h2>
+
+  <form method="post" class="form">
+    <div class="field">
+      <label for="f1">Follower X</label>
+      <input id="f1" name="f1" value="{{ f1 or '' }}" required>
+    </div>
+    <div class="field">
+      <label for="f2">Follower Y</label>
+      <input id="f2" name="f2" value="{{ f2 or '' }}" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Run query</button>
   </form>
 
   {% if rows %}
@@ -19,6 +23,6 @@
       {% endfor %}
     </ul>
   {% elif f1 and f2 %}
-    <p>No such users found.</p>
+    <p class="muted">No such users found.</p>
   {% endif %}
 {% endblock %}

@@ -228,7 +228,7 @@ def blog_detail(blog_id):
 @app.route("/reports")
 @login_required
 def reports_home():
-    return render_template("reports_home.html")
+    return render_template("reports/reports_home.html")
 
 # Q1 — users who posted two blogs on same day with tag X and Y
 @app.route("/reports/q1", methods=["GET","POST"])
@@ -249,7 +249,7 @@ def report_q1():
                     JOIN blog_tag t2 ON t2.blog_id=b2.id
                     WHERE t1.tag=? AND t2.tag=? AND b1.id<>b2.id
                 """,(tag1,tag2)).fetchall()
-    return render_template("report_q1.html", rows=rows, tag1=tag1, tag2=tag2)
+    return render_template("reports/report_q1.html", rows=rows, tag1=tag1, tag2=tag2)
 
 # Q2 — users who posted most blogs on a given date
 @app.route("/reports/q2", methods=["GET","POST"])
@@ -269,7 +269,7 @@ def report_q2():
                     maxc AS (SELECT MAX(c) m FROM counts)
                     SELECT owner FROM counts,maxc WHERE c=m;
                 """,(date,)).fetchall()
-    return render_template("report_q2.html", rows=rows, date=date)
+    return render_template("reports/report_q2.html", rows=rows, date=date)
 
 # Q3 — users followed by both X and Y
 @app.route("/reports/q3", methods=["GET","POST"])
@@ -287,7 +287,7 @@ def report_q3():
                     WHERE EXISTS(SELECT 1 FROM follow f WHERE f.followee=u.username AND f.follower=?)
                       AND EXISTS(SELECT 1 FROM follow f WHERE f.followee=u.username AND f.follower=?)
                 """,(f1,f2)).fetchall()
-    return render_template("report_q3.html", rows=rows, f1=f1, f2=f2)
+    return render_template("reports/report_q3.html", rows=rows, f1=f1, f2=f2)
 
 # Q4 — users who never posted a blog
 @app.route("/reports/q4")
@@ -299,7 +299,7 @@ def report_q4():
             FROM user u LEFT JOIN blog b ON b.owner=u.username
             WHERE b.id IS NULL;
         """).fetchall()
-    return render_template("report_q4.html", rows=rows)
+    return render_template("reports/report_q4.html", rows=rows)
 
 # Q5 — blogs of user X with all-positive comments
 @app.route("/reports/q5", methods=["GET","POST"])
@@ -319,7 +319,7 @@ def report_q5():
                     HAVING COUNT(*)>0
                        AND SUM(CASE WHEN c.sentiment='negative' THEN 1 ELSE 0 END)=0;
                 """,(userx,)).fetchall()
-    return render_template("report_q5.html", rows=rows, userx=userx)
+    return render_template("reports/report_q5.html", rows=rows, userx=userx)
 
 # Q6 — users whose every comment is negative
 @app.route("/reports/q6")
@@ -333,7 +333,7 @@ def report_q6():
             HAVING COUNT(*)>0
                AND SUM(CASE WHEN c.sentiment='positive' THEN 1 ELSE 0 END)=0;
         """).fetchall()
-    return render_template("report_q6.html", rows=rows)
+    return render_template("reports/report_q6.html", rows=rows)
 
 # Q7 — users whose blogs never received negative comments
 @app.route("/reports/q7")
@@ -351,7 +351,7 @@ def report_q7():
                  ) THEN 1 ELSE 0 END
                )=0;
         """).fetchall()
-    return render_template("report_q7.html", rows=rows)
+    return render_template("reports/report_q7.html", rows=rows)
 
 
 # ---------- main ----------

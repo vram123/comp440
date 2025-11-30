@@ -1,11 +1,14 @@
 {% extends "base.html" %}
+{% block title %}Q5 · All-Positive Blogs of X{% endblock %}
 {% block content %}
-  <h2>Q5: Blogs of user X with all-positive comments</h2>
-  <form method="post">
-    <label>Username X
-      <input name="userx" value="{{ userx or '' }}" required>
-    </label>
-    <button type="submit">Search</button>
+  <h2 class="h1">Q5: Blogs of user X where all comments are positive</h2>
+
+  <form method="post" class="form">
+    <div class="field">
+      <label for="userx">Username X</label>
+      <input id="userx" name="userx" value="{{ userx or '' }}" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Run query</button>
   </form>
 
   {% if rows %}
@@ -16,6 +19,6 @@
       {% endfor %}
     </ul>
   {% elif userx %}
-    <p>No matching blogs found for {{ userx }}.</p>
+    <p class="muted">No matching blogs found for {{ userx }}.</p>
   {% endif %}
 {% endblock %}

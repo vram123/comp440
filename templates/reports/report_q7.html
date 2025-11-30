@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% block title %}Q7 · Blogs Never Got Negative Comments{% endblock %}
 {% block content %}
-  <h2>Q7: Users whose blogs never received negative comments</h2>
+  <h2 class="h1">Q7: Users whose blogs never received negative comments</h2>
 
   {% if rows %}
     <ul>
@@ -9,6 +10,6 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p>No such users found.</p>
+    <p class="muted">No such users found.</p>
   {% endif %}
 {% endblock %}

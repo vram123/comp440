@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% block title %}Q4 · Users with No Blogs{% endblock %}
 {% block content %}
-  <h2>Q4: Users who never posted a blog</h2>
+  <h2 class="h1">Q4: Users who never posted a blog</h2>
 
   {% if rows %}
     <ul>
@@ -9,6 +10,6 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p>Every user has posted at least one blog.</p>
+    <p class="muted">Every user has posted at least one blog.</p>
   {% endif %}
 {% endblock %}
