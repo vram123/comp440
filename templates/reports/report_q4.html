@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Q4: Users who never posted a blog</h2>
+
+  {% if rows %}
+    <ul>
+      {% for r in rows %}
+        <li>{{ r.username }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Every user has posted at least one blog.</p>
+  {% endif %}
+{% endblock %}

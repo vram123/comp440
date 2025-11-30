@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Q1: Users with two blogs on the same day with tag X and Y</h2>
+  <form method="post">
+    <label>Tag X
+      <input name="tag1" value="{{ tag1 or '' }}" required>
+    </label>
+    <label>Tag Y
+      <input name="tag2" value="{{ tag2 or '' }}" required>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+
+  {% if rows %}
+    <h3>Users:</h3>
+    <ul>
+      {% for r in rows %}
+        <li>{{ r.owner }}</li>
+      {% endfor %}
+    </ul>
+  {% elif tag1 and tag2 %}
+    <p>No users found for those tags on the same day.</p>
+  {% endif %}
+{% endblock %}

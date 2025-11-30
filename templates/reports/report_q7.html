@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Q7: Users whose blogs never received negative comments</h2>
+
+  {% if rows %}
+    <ul>
+      {% for r in rows %}
+        <li>{{ r.owner }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No such users found.</p>
+  {% endif %}
+{% endblock %}

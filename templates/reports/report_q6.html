@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Q6: Users whose every comment is negative</h2>
+
+  {% if rows %}
+    <ul>
+      {% for r in rows %}
+        <li>{{ r.reviewer }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No such users found.</p>
+  {% endif %}
+{% endblock %}

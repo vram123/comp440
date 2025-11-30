@@ -224,6 +224,136 @@ def blog_detail(blog_id):
 
     return render_template("blog_detail.html", blog=blog, comments=comments)
 
+# ---------- phase 3 ----------
+@app.route("/reports")
+@login_required
+def reports_home():
+    return render_template("reports_home.html")
+
+# Q1 — users who posted two blogs on same day with tag X and Y
+@app.route("/reports/q1", methods=["GET","POST"])
+@login_required
+def report_q1():
+    rows = []
+    tag1 = tag2 = ""
+    if request.method == "POST":
+        tag1 = request.form.get("tag1","").strip().lower()
+        tag2 = request.form.get("tag2","").strip().lower()
+        if tag1 and tag2:
+            with get_db() as conn:
+                rows = conn.execute("""
+                    SELECT DISTINCT b1.owner
+                    FROM blog b1
+                    JOIN blog_tag t1 ON t1.blog_id=b1.id
+                    JOIN blog b2 ON b2.owner=b1.owner AND date(b1.created_at)=date(b2.created_at)
+                    JOIN blog_tag t2 ON t2.blog_id=b2.id
+                    WHERE t1.tag=? AND t2.tag=? AND b1.id<>b2.id
+                """,(tag1,tag2)).fetchall()
+    return render_template("report_q1.html", rows=rows, tag1=tag1, tag2=tag2)
+
+# Q2 — users who posted most blogs on a given date
+@app.route("/reports/q2", methods=["GET","POST"])
+@login_required
+def report_q2():
+    rows=[]; date=""
+    if request.method=="POST":
+        date=request.form.get("date","")
+        if date:
+            with get_db() as conn:
+                rows=conn.execute("""
+                    WITH counts AS (
+                      SELECT owner,COUNT(*) c
+                      FROM blog WHERE date(created_at)=date(?)
+                      GROUP BY owner
+                    ),
+                    maxc AS (SELECT MAX(c) m FROM counts)
+                    SELECT owner FROM counts,maxc WHERE c=m;
+                """,(date,)).fetchall()
+    return render_template("report_q2.html", rows=rows, date=date)
+
+# Q3 — users followed by both X and Y
+@app.route("/reports/q3", methods=["GET","POST"])
+@login_required
+def report_q3():
+    rows=[]; f1=f2=""
+    if request.method=="POST":
+        f1=request.form.get("f1","").strip()
+        f2=request.form.get("f2","").strip()
+        if f1 and f2:
+            with get_db() as conn:
+                rows=conn.execute("""
+                    SELECT u.username
+                    FROM user u
+                    WHERE EXISTS(SELECT 1 FROM follow f WHERE f.followee=u.username AND f.follower=?)
+                      AND EXISTS(SELECT 1 FROM follow f WHERE f.followee=u.username AND f.follower=?)
+                """,(f1,f2)).fetchall()
+    return render_template("report_q3.html", rows=rows, f1=f1, f2=f2)
+
+# Q4 — users who never posted a blog
+@app.route("/reports/q4")
+@login_required
+def report_q4():
+    with get_db() as conn:
+        rows=conn.execute("""
+            SELECT u.username
+            FROM user u LEFT JOIN blog b ON b.owner=u.username
+            WHERE b.id IS NULL;
+        """).fetchall()
+    return render_template("report_q4.html", rows=rows)
+
+# Q5 — blogs of user X with all-positive comments
+@app.route("/reports/q5", methods=["GET","POST"])
+@login_required
+def report_q5():
+    rows=[]; userx=""
+    if request.method=="POST":
+        userx=request.form.get("userx","").strip()
+        if userx:
+            with get_db() as conn:
+                rows=conn.execute("""
+                    SELECT b.id,b.subject
+                    FROM blog b
+                    JOIN comment c ON c.blog_id=b.id
+                    WHERE b.owner=?
+                    GROUP BY b.id
+                    HAVING COUNT(*)>0
+                       AND SUM(CASE WHEN c.sentiment='negative' THEN 1 ELSE 0 END)=0;
+                """,(userx,)).fetchall()
+    return render_template("report_q5.html", rows=rows, userx=userx)
+
+# Q6 — users whose every comment is negative
+@app.route("/reports/q6")
+@login_required
+def report_q6():
+    with get_db() as conn:
+        rows=conn.execute("""
+            SELECT c.reviewer
+            FROM comment c
+            GROUP BY c.reviewer
+            HAVING COUNT(*)>0
+               AND SUM(CASE WHEN c.sentiment='positive' THEN 1 ELSE 0 END)=0;
+        """).fetchall()
+    return render_template("report_q6.html", rows=rows)
+
+# Q7 — users whose blogs never received negative comments
+@app.route("/reports/q7")
+@login_required
+def report_q7():
+    with get_db() as conn:
+        rows=conn.execute("""
+            SELECT b.owner
+            FROM blog b
+            GROUP BY b.owner
+            HAVING COUNT(*)>0
+               AND SUM(
+                 CASE WHEN EXISTS(
+                   SELECT 1 FROM comment c WHERE c.blog_id=b.id AND c.sentiment='negative'
+                 ) THEN 1 ELSE 0 END
+               )=0;
+        """).fetchall()
+    return render_template("report_q7.html", rows=rows)
+
+
 # ---------- main ----------
 if __name__ == "__main__":
     # Bind to 0.0.0.0 so it works in Docker too

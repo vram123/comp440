@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Q2: Users who posted the most blogs on a specific date</h2>
+  <form method="post">
+    <label>Date (YYYY-MM-DD)
+      <input name="date" value="{{ date or '' }}" placeholder="2025-10-10" required>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+
+  {% if rows %}
+    <h3>Users with the highest number of blogs on {{ date }}:</h3>
+    <ul>
+      {% for r in rows %}
+        <li>{{ r.owner }}</li>
+      {% endfor %}
+    </ul>
+  {% elif date %}
+    <p>No blogs found for that date.</p>
+  {% endif %}
+{% endblock %}

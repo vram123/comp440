@@ -45,3 +45,13 @@ CREATE TABLE IF NOT EXISTS comment (
   UNIQUE (blog_id, reviewer) -- ≤1 comment per blog per user
 );
 CREATE INDEX IF NOT EXISTS idx_comment_reviewer_created ON comment(reviewer, created_at);
+
+-- === Phase 3 table ===
+CREATE TABLE IF NOT EXISTS follow (
+  follower TEXT NOT NULL,
+  followee TEXT NOT NULL,
+  PRIMARY KEY (follower, followee),
+  FOREIGN KEY (follower) REFERENCES user(username),
+  FOREIGN KEY (followee) REFERENCES user(username)
+);
+

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Q5: Blogs of user X with all-positive comments</h2>
+  <form method="post">
+    <label>Username X
+      <input name="userx" value="{{ userx or '' }}" required>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+
+  {% if rows %}
+    <h3>Blogs of {{ userx }} where all comments are positive:</h3>
+    <ul>
+      {% for r in rows %}
+        <li>Blog ID {{ r.id }} — {{ r.subject }}</li>
+      {% endfor %}
+    </ul>
+  {% elif userx %}
+    <p>No matching blogs found for {{ userx }}.</p>
+  {% endif %}
+{% endblock %}
