@@ -353,6 +353,78 @@ def report_q7():
         """).fetchall()
     return render_template("reports/report_q7.html", rows=rows)
 
+# ---------- FOLLOW (for Phase 3) ----------
+
+@app.route("/follow", methods=["GET", "POST"])
+@login_required
+def follow_page():
+    current = session["user"]["username"]
+    message_user = ""
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        target = (request.form.get("target") or "").strip()
+
+        if not target:
+            flash("Please enter a username.", "error")
+        elif target == current:
+            flash("You cannot follow yourself.", "error")
+        else:
+            with get_db() as conn:
+                # Check that target user exists
+                exists = conn.execute(
+                    "SELECT 1 FROM user WHERE username = ?",
+                    (target,)
+                ).fetchone()
+                if not exists:
+                    flash("User does not exist.", "error")
+                else:
+                    if action == "follow":
+                        try:
+                            conn.execute(
+                                "INSERT INTO follow (follower, followee) VALUES (?, ?)",
+                                (current, target),
+                            )
+                            conn.commit()
+                            flash(f"You are now following {target}.", "success")
+                        except Exception:
+                            # Primary key prevents duplicates
+                            flash(f"You are already following {target}.", "info")
+                    elif action == "unfollow":
+                        conn.execute(
+                            "DELETE FROM follow WHERE follower = ? AND followee = ?",
+                            (current, target),
+                        )
+                        conn.commit()
+                        flash(f"If you were following {target}, it has been removed.", "success")
+
+        message_user = target
+
+    # Load follower/following lists
+    with get_db() as conn:
+        following = conn.execute("""
+            SELECT u.username, u.firstName, u.lastName
+            FROM follow f
+            JOIN user u ON u.username = f.followee
+            WHERE f.follower = ?
+            ORDER BY u.username
+        """, (current,)).fetchall()
+
+        followers = conn.execute("""
+            SELECT u.username, u.firstName, u.lastName
+            FROM follow f
+            JOIN user u ON u.username = f.follower
+            WHERE f.followee = ?
+            ORDER BY u.username
+        """, (current,)).fetchall()
+
+    return render_template(
+        "follow.html",
+        following=following,
+        followers=followers,
+        last_target=message_user,
+    )
+
 
 # ---------- main ----------
 if __name__ == "__main__":
