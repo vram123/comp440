@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Follow Users · COMP 440{% endblock %}
+{% block content %}
+  <h1 class="h1">Follow / Unfollow Users</h1>
+
+  <form method="post" class="form">
+    <div class="field">
+      <label for="target">Username</label>
+      <input id="target" name="target"
+             value="{{ last_target or '' }}"
+             required
+             placeholder="Enter a username to follow or unfollow">
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" type="submit" name="action" value="follow">
+        Follow
+      </button>
+      <button class="btn btn-ghost" type="submit" name="action" value="unfollow">
+        Unfollow
+      </button>
+    </div>
+  </form>
+
+  <hr>
+
+  <h2>Your following</h2>
+  {% if following %}
+    <ul>
+      {% for u in following %}
+        <li>{{ u.username }} — {{ u.firstName }} {{ u.lastName }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">You are not following anyone yet.</p>
+  {% endif %}
+
+  <h2>Your followers</h2>
+  {% if followers %}
+    <ul>
+      {% for u in followers %}
+        <li>{{ u.username }} — {{ u.firstName }} {{ u.lastName }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No one is following you yet.</p>
+  {% endif %}
+{% endblock %}
